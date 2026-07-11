@@ -6,6 +6,16 @@ It is built as a monorepo with an Express/Node.js backend (using Socket.io and M
 
 ---
 
+## Screenshots
+
+### Login Page
+![Login Page](screenshots/login.png)
+
+### Chat Dashboard
+![Chat Dashboard](screenshots/chat.png)
+
+---
+
 ## Features
 
 ### 🌟 Core Features
