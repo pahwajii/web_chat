@@ -10,7 +10,8 @@ import {
   Wifi,
   WifiOff,
   Check,
-  CheckCheck
+  CheckCheck,
+  Sparkles
 } from 'lucide-react';
 
 export default function Chat() {
@@ -216,7 +217,7 @@ export default function Chat() {
             ) : (
               filteredUsers.map((username) => {
                 const isSelected = activeChatUser === username;
-                const isOnline = isUserOnline(username);
+                const isOnline = username === 'Gemini' ? true : isUserOnline(username);
                 const isTyping = typingUsers[username];
                 const unreadCount = unreadCounts[username] || 0;
 
@@ -232,13 +233,19 @@ export default function Chat() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative flex-shrink-0">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-semibold text-sm ${
-                          isSelected ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'
-                        }`}>
-                          {username.substring(0, 2).toUpperCase()}
-                        </div>
+                        {username === 'Gemini' ? (
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                            <Sparkles className="w-5 h-5" />
+                          </div>
+                        ) : (
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-semibold text-sm ${
+                            isSelected ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'
+                          }`}>
+                            {username.substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
                         <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#0f172a] ${
-                          isOnline ? 'bg-emerald-500' : 'bg-slate-500'
+                          username === 'Gemini' ? 'bg-indigo-400 animate-pulse' : isOnline ? 'bg-emerald-500' : 'bg-slate-500'
                         }`}></span>
                       </div>
                       
@@ -276,11 +283,17 @@ export default function Chat() {
               <div className="p-4 border-b border-slate-800/50 flex items-center justify-between bg-[#1e293b]/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white">
-                      {activeChatUser.substring(0, 2).toUpperCase()}
-                    </div>
+                    {activeChatUser === 'Gemini' ? (
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white">
+                        {activeChatUser.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#0f172a] ${
-                      isUserOnline(activeChatUser) ? 'bg-emerald-500' : 'bg-slate-500'
+                      activeChatUser === 'Gemini' ? 'bg-indigo-400 animate-pulse' : isUserOnline(activeChatUser) ? 'bg-emerald-500' : 'bg-slate-500'
                     }`}></span>
                   </div>
                   <div>
@@ -288,6 +301,8 @@ export default function Chat() {
                     <p className="text-xs text-slate-400">
                       {typingUsers[activeChatUser] ? (
                         <span className="text-blue-400 font-medium">typing...</span>
+                      ) : activeChatUser === 'Gemini' ? (
+                        'AI Assistant'
                       ) : isUserOnline(activeChatUser) ? (
                         'Online'
                       ) : (
@@ -299,7 +314,7 @@ export default function Chat() {
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded-md">
-                    Direct Message
+                    {activeChatUser === 'Gemini' ? 'AI Bot' : 'Direct Message'}
                   </span>
                 </div>
               </div>

@@ -229,7 +229,8 @@ export const ChatProvider = ({ children }) => {
   // Compute a list of all distinct users (online + historical)
   const getUniqueUsersList = useCallback(() => {
     const set = new Set([...onlineUsers, ...allRegisteredUsers]);
-    return Array.from(set);
+    const filtered = Array.from(set).filter(u => u !== 'Gemini' && u !== currentUserRef.current);
+    return currentUserRef.current === 'Gemini' ? filtered : ['Gemini', ...filtered];
   }, [onlineUsers, allRegisteredUsers]);
 
   return (

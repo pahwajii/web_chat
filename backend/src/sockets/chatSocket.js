@@ -1,7 +1,66 @@
 import Message from '../models/message.js';
+import { generateGeminiResponse } from '../services/geminiService.js';
 
 // Maps username -> Set of socket IDs (to support multiple tabs per user)
 const userSocketMap = new Map();
+
+// Helper to generate and emit Gemini responses
+async function handleGeminiChat(io, sender, userMessage) {
+  try {
+    // 1. Emit typing event so user sees typing indicator
+    if (userSocketMap.has(sender)) {
+      userSocketMap.get(sender).forEach((socketId) => {
+        io.to(socketId).emit('typing', { sender: 'Gemini', receiver: sender });
+      });
+    }
+
+    // 2. Fetch recent conversation history between the sender and Gemini
+    const history = await Message.find({
+      $or: [
+        { sender: sender, receiver: 'Gemini' },
+        { sender: 'Gemini', receiver: sender },
+      ],
+    }).sort({ createdAt: -1 }).limit(15);
+
+    // Sort to chronological order
+    history.reverse();
+
+    // 3. Generate Gemini response
+    const botReply = await generateGeminiResponse(history);
+
+    // 4. Save Gemini's message to MongoDB
+    const botMessage = new Message({
+      sender: 'Gemini',
+      receiver: sender,
+      message: botReply,
+      delivered: true,
+      read: false,
+    });
+    const savedBotMessage = await botMessage.save();
+
+    // 5. Emit stopTyping event
+    if (userSocketMap.has(sender)) {
+      userSocketMap.get(sender).forEach((socketId) => {
+        io.to(socketId).emit('stopTyping', { sender: 'Gemini', receiver: sender });
+      });
+    }
+
+    // 6. Send the bot message to the sender (all active sockets/tabs)
+    if (userSocketMap.has(sender)) {
+      userSocketMap.get(sender).forEach((socketId) => {
+        io.to(socketId).emit('receiveMessage', savedBotMessage.toObject());
+      });
+    }
+  } catch (error) {
+    console.error('Error handling Gemini response:', error);
+    // In case of error, make sure to stop typing indicator
+    if (userSocketMap.has(sender)) {
+      userSocketMap.get(sender).forEach((socketId) => {
+        io.to(socketId).emit('stopTyping', { sender: 'Gemini', receiver: sender });
+      });
+    }
+  }
+}
 
 export default function chatSocket(io) {
   io.on('connection', (socket) => {
@@ -67,6 +126,12 @@ export default function chatSocket(io) {
             io.to(socketId).emit('messageSentConfirm', messagePayload);
           });
         }
+
+        // If the receiver is Gemini, trigger AI response generation
+        if (receiver === 'Gemini') {
+          handleGeminiChat(io, sender, message);
+        }
+
       } catch (error) {
         console.error('Error saving or sending message:', error);
       }

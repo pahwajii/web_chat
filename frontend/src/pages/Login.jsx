@@ -39,6 +39,11 @@ export default function Login() {
       return;
     }
 
+    if (name.toLowerCase() === 'gemini') {
+      setError('This username is reserved for the AI Assistant');
+      return;
+    }
+
     setError('');
     login(name);
     navigate('/chat');
