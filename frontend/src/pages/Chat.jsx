@@ -11,7 +11,8 @@ import {
   WifiOff,
   Check,
   CheckCheck,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function Chat() {
@@ -141,7 +142,9 @@ export default function Chat() {
       <div className="w-full h-screen md:h-[90vh] md:max-w-6xl glass-panel md:rounded-2xl shadow-2xl flex overflow-hidden border border-slate-800/40 relative">
         
         {/* SIDEBAR: Users list */}
-        <div className="w-80 border-r border-slate-800/50 flex flex-col bg-[#1e293b]/40 backdrop-blur-md">
+        <div className={`w-full md:w-80 border-r border-slate-800/50 flex-col bg-[#1e293b]/40 backdrop-blur-md ${
+          activeChatUser ? 'hidden md:flex' : 'flex'
+        }`}>
           
           {/* Sidebar Header */}
           <div className="p-4 border-b border-slate-800/50 flex items-center justify-between">
@@ -294,12 +297,21 @@ export default function Chat() {
         </div>
 
         {/* MAIN PANEL: Chat pane */}
-        <div className="flex-1 flex flex-col bg-[#0f172a]/20">
+        <div className={`flex-1 flex-col bg-[#0f172a]/20 ${
+          activeChatUser ? 'flex' : 'hidden md:flex'
+        }`}>
           {activeChatUser ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b border-slate-800/50 flex items-center justify-between bg-[#1e293b]/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => selectChatUser(null)}
+                    className="p-1.5 hover:bg-slate-800/50 rounded-lg text-slate-400 hover:text-white md:hidden cursor-pointer mr-1 flex items-center justify-center"
+                    title="Back to contacts list"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
                   <div className="relative">
                     {activeChatUser === 'Gemini' ? (
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white">
