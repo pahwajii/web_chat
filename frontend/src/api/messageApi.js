@@ -41,6 +41,17 @@ export const messageApi = {
       console.error('Error sending message via API:', error);
       throw error;
     }
+  },
+
+  // Google OAuth Login
+  googleLogin: async (idToken) => {
+    try {
+      const response = await api.post('/auth/google', { idToken });
+      return response.data;
+    } catch (error) {
+      console.error('Error in Google Authentication:', error);
+      throw error;
+    }
   }
 };
 

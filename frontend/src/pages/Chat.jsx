@@ -18,6 +18,8 @@ export default function Chat() {
   const navigate = useNavigate();
   const {
     currentUser,
+    currentUserPicture,
+    userProfiles,
     activeChatUser,
     messages,
     onlineUsers,
@@ -144,9 +146,18 @@ export default function Chat() {
           {/* Sidebar Header */}
           <div className="p-4 border-b border-slate-800/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/10">
-                {currentUser ? currentUser.substring(0, 2).toUpperCase() : 'U'}
-              </div>
+              {currentUserPicture ? (
+                <img
+                  src={currentUserPicture}
+                  alt={currentUser}
+                  referrerPolicy="no-referrer"
+                  className="w-9 h-9 rounded-xl object-cover shadow-md shadow-blue-500/10"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/10">
+                  {currentUser ? currentUser.substring(0, 2).toUpperCase() : 'U'}
+                </div>
+              )}
               <div className="leading-tight">
                 <h2 className="font-semibold text-sm truncate max-w-[120px]">{currentUser}</h2>
                 <div className="flex items-center gap-1">
@@ -237,6 +248,13 @@ export default function Chat() {
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
                             <Sparkles className="w-5 h-5" />
                           </div>
+                        ) : userProfiles[username]?.picture ? (
+                          <img
+                            src={userProfiles[username].picture}
+                            alt={username}
+                            referrerPolicy="no-referrer"
+                            className="w-10 h-10 rounded-xl object-cover"
+                          />
                         ) : (
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-semibold text-sm ${
                             isSelected ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'
@@ -287,6 +305,13 @@ export default function Chat() {
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white">
                         <Sparkles className="w-5 h-5" />
                       </div>
+                    ) : userProfiles[activeChatUser]?.picture ? (
+                      <img
+                        src={userProfiles[activeChatUser].picture}
+                        alt={activeChatUser}
+                        referrerPolicy="no-referrer"
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white">
                         {activeChatUser.substring(0, 2).toUpperCase()}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChat } from '../context/ChatContext';
+import { messageApi } from '../api/messageApi';
 import { MessageSquare, User, ArrowRight } from 'lucide-react';
 
 export default function Login() {
@@ -9,11 +10,56 @@ export default function Login() {
   const { currentUser, login } = useChat();
   const navigate = useNavigate();
 
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '505600776309-0r0gl3paspl5rroc6mepkulb9b48iv3c.apps.googleusercontent.com';
+
+  const handleGoogleCredentialResponse = async (response) => {
+    try {
+      setError('');
+      const idToken = response.credential;
+      
+      // Make backend API request to verify and login
+      const data = await messageApi.googleLogin(idToken);
+      const { name, email, picture } = data.user;
+      
+      login(name, email, picture);
+      navigate('/chat');
+    } catch (err) {
+      console.error('Google Sign-In Error:', err);
+      setError(err.response?.data?.message || 'Failed to authenticate with Google. Please try again.');
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       navigate('/chat');
     }
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    const initializeGoogle = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('googleSignInBtn'),
+          { theme: 'outline', size: 'large', type: 'standard', shape: 'pill', width: '300' }
+        );
+      }
+    };
+
+    initializeGoogle();
+
+    const interval = setInterval(() => {
+      if (window.google) {
+        initializeGoogle();
+        clearInterval(interval);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,14 +110,26 @@ export default function Login() {
             ConvoHub
           </h1>
           <p className="text-slate-400 text-sm mt-2 text-center">
-            Enter a username to join the real-time conversation.
+            Sign in with your Google Account or join as a guest.
           </p>
+        </div>
+
+        {/* Google Sign In Button */}
+        <div className="flex flex-col items-center justify-center space-y-4 mb-6">
+          <div id="googleSignInBtn" className="w-full flex justify-center"></div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <div className="flex-1 border-t border-slate-800/80"></div>
+          <span className="px-3 text-[10px] text-slate-500 uppercase tracking-widest font-bold">Or continue as guest</span>
+          <div className="flex-1 border-t border-slate-800/80"></div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Username
+              Guest Username
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">

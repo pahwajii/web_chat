@@ -6,6 +6,9 @@ const ChatContext = createContext(null);
 
 export const ChatProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => localStorage.getItem('chat_username') || '');
+  const [currentUserEmail, setCurrentUserEmail] = useState(() => localStorage.getItem('chat_email') || '');
+  const [currentUserPicture, setCurrentUserPicture] = useState(() => localStorage.getItem('chat_picture') || '');
+  const [userProfiles, setUserProfiles] = useState({}); // { username: { username, picture, email } }
   const [activeChatUser, setActiveChatUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -29,9 +32,19 @@ export const ChatProvider = ({ children }) => {
   // Load all users from REST endpoint
   const loadUsersList = useCallback(async () => {
     try {
-      const users = await messageApi.getUsers();
+      const usersData = await messageApi.getUsers();
+      const profilesMap = {};
+      const usernames = [];
+      
+      usersData.forEach(u => {
+        profilesMap[u.username] = u;
+        usernames.push(u.username);
+      });
+      
+      setUserProfiles(prev => ({ ...prev, ...profilesMap }));
+      
       // Filter out self
-      const filtered = users.filter(u => u !== currentUserRef.current);
+      const filtered = usernames.filter(u => u !== currentUserRef.current);
       setAllRegisteredUsers(filtered);
     } catch (err) {
       console.error('Failed to load registered users:', err);
@@ -125,12 +138,17 @@ export const ChatProvider = ({ children }) => {
   }, [loadUsersList]);
 
   // Login handler
-  const login = useCallback((username) => {
+  const login = useCallback((username, email = '', picture = '') => {
     const trimmed = username.trim();
     if (!trimmed) return;
     
     localStorage.setItem('chat_username', trimmed);
+    localStorage.setItem('chat_email', email);
+    localStorage.setItem('chat_picture', picture);
+    
     setCurrentUser(trimmed);
+    setCurrentUserEmail(email);
+    setCurrentUserPicture(picture);
     
     const socket = socketService.connect(trimmed);
     setSocketConnected(socket.connected);
@@ -142,7 +160,12 @@ export const ChatProvider = ({ children }) => {
   const logout = useCallback(() => {
     socketService.disconnect();
     localStorage.removeItem('chat_username');
+    localStorage.removeItem('chat_email');
+    localStorage.removeItem('chat_picture');
     setCurrentUser('');
+    setCurrentUserEmail('');
+    setCurrentUserPicture('');
+    setUserProfiles({});
     setActiveChatUser(null);
     setMessages([]);
     setOnlineUsers([]);
@@ -237,6 +260,9 @@ export const ChatProvider = ({ children }) => {
     <ChatContext.Provider
       value={{
         currentUser,
+        currentUserEmail,
+        currentUserPicture,
+        userProfiles,
         activeChatUser,
         messages,
         onlineUsers,
