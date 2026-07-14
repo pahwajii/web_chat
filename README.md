@@ -40,6 +40,19 @@ It is built as a monorepo with an Express/Node.js backend (using Socket.io and M
 
 ---
 
+## 🤖 Gemini AI Bot Integration
+
+ConvoHub features a built-in AI chatbot named **Gemini** whitelisted as a reserved user.
+
+### Key Integration Highlights:
+*   **Asynchronous WebSocket Processing**: Direct messages sent to `Gemini` are handled asynchronously by the backend socket listener. It immediately confirms the user's message and spawns a background thread to generate the bot's response, keeping the UI highly responsive.
+*   **Live Typing Indicators**: While the Gemini API is processing the query, a live typing socket event is broadcasted so the user sees a bouncing typing indicator (`"Gemini is typing..."`).
+*   **Alternating Message History**: The Gemini API requires conversation history to strictly alternate between `user` and `model` roles. Our integration merges consecutive messages sent by the same user and cleans the database records before generating the final prompt payload.
+*   **Custom Persona**: Powered by `gemini-2.5-flash` with a tailored system instruction defining it as a polite, helpful, and creative developer assistant inside ConvoHub.
+*   **Graceful API Key Handling**: If the `GEMINI_API_KEY` is missing in the backend `.env` file, the bot returns a friendly setup instructions card directly in the chat panel instead of crashing.
+
+---
+
 ## Project Structure
 
 ```text
