@@ -14,6 +14,9 @@ It is built as a monorepo with an Express/Node.js backend (using Socket.io and M
 ### Chat Dashboard
 ![Chat Dashboard](screenshots/chat.png)
 
+### Gemini AI Chatbot
+![Gemini AI Chatbot](screenshots/gemini_chat.png)
+
 ---
 
 ## Features
@@ -22,11 +25,12 @@ It is built as a monorepo with an Express/Node.js backend (using Socket.io and M
 *   **Real-time Messaging:** Messages are sent and received instantly via WebSockets (`socket.io`).
 *   **Stunning Modern UI:** Premium glassmorphism aesthetics, responsive layouts, tailored dark mode color palettes, custom gradients, and micro-animations.
 *   **Persistent History:** All direct message histories are stored and fetched from a MongoDB database.
+*   **Gemini AI Chatbot:** Talk to a dedicated AI assistant directly in the chat! Pinned at the top of your sidebar, styled with custom sparkle gradient avatars and pulsing active status indicators.
 
 ### 🚀 Bonus Features (Fully Implemented)
 *   **Username-Based Login:** Simple dummy authentication. Users log in using only a unique username.
 *   **Online/Offline User Status:** Interactive sidebar displaying the active/inactive status of all users with real-time indicators.
-*   **Live Typing Indicator:** Shows when a chat partner is typing.
+*   **Live Typing Indicator:** Shows when a chat partner is typing (including live typing dots when Gemini is thinking).
 *   **Message Delivery & Read Receipts:** 
     *   **Single Check (`✓`):** Sent to the server, receiver is offline.
     *   **Double Gray Check (`✓✓`):** Delivered (receiver is online).
@@ -43,6 +47,7 @@ web_chat/
 │   │   ├── controllers/   # Message APIs
 │   │   ├── models/        # Mongoose Schema (Message)
 │   │   ├── routes/        # Express Routes
+│   │   ├── services/      # Service integration layers (Gemini API)
 │   │   ├── sockets/       # Socket.io connection & event handlers
 │   │   ├── app.js         # Express app initialization
 │   │   └── server.js      # Server entry point
@@ -79,12 +84,16 @@ Create a `.env` file in the `backend/` directory (or duplicate `backend/.env.exa
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/web_chat
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:5174
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 *   `PORT`: The port the backend server listens on (default: `5000`).
 *   `MONGODB_URI`: The MongoDB connection string.
-*   `CLIENT_URL`: The origin of the frontend client (for CORS configuration).
+*   `CLIENT_URL`: The origin of the frontend client (for CORS configuration, default: `http://localhost:5174`).
+*   `GEMINI_API_KEY`: Your Gemini API Key from Google AI Studio.
+*   `GEMINI_MODEL`: The Gemini API model to query (default: `gemini-2.5-flash`).
 
 ### Frontend
 
@@ -135,6 +144,8 @@ By default, the frontend is configured to connect to the backend at `http://loca
 2.  **Context-Driven React State:** A custom `ChatContext` wraps the application. This encapsulates all Socket.io listeners, state updates (typing, online status, messaging lists), and backend API queries in a clean, reusable interface, freeing the UI components from state complexity.
 3.  **Dynamic Socket Room / Direct Addressing:** Socket.io events are mapped to unique users dynamically using a `userSocketMap`. Instead of relying on rigid, pre-defined chatrooms, direct messages are targeted using specific socket IDs mapped to registered usernames, allowing multi-device/multi-tab synchronization.
 4.  **Tailored Glassmorphism & Custom Palettes:** Used Tailwind CSS combined with backdrop filters (`backdrop-blur-md`), dark backgrounds (`#0f172a`), and rich gradients (from blue to indigo) to give a modern, premium feel.
+5.  **Strict Alternating Gemini Schema:** The Gemini API requires strict alternating roles between `user` and `model` (starting with `user`). Our backend service processes Mongoose message histories to merge sequential messages by the same sender, ensuring API request validity.
+6.  **Node Native Fetch Integration:** Utilizing Node 22's global `fetch` avoids introducing external HTTP dependencies (like Axios or specific SDK wrappers) to compile the backend service, minimizing build footprints.
 
 ---
 

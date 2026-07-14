@@ -12,7 +12,7 @@ export async function generateGeminiResponse(history) {
   const apiKey = process.env.GEMINI_API_KEY;
   const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+  if (!apiKey) {
     return "Hi there! I'm Gemini, your AI assistant. To enable me to talk to you, please configure the `GEMINI_API_KEY` environment variable in the backend `.env` file.";
   }
 
